@@ -35,6 +35,101 @@
 
 * Frontend (JavaScript)
 
+* Implementing tts using react in frontend(React)
+
+```bash
+import React, { useState, useEffect } from 'react';
+
+const TextToSpeechWithControls = () => {
+  const [text, setText] = useState("");
+  const [voices, setVoices] = useState([]);
+  const [selectedVoice, setSelectedVoice] = useState(null);
+  const [rate, setRate] = useState(1);
+  const [pitch, setPitch] = useState(1);
+
+  // Load available voices once the component mounts
+  useEffect(() => {
+    const loadVoices = () => {
+      const availableVoices = window.speechSynthesis.getVoices();
+      setVoices(availableVoices);
+      setSelectedVoice(availableVoices[0]); // Set default voice
+    };
+
+    loadVoices();
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+  }, []);
+
+  const handleTextChange = (e) => {
+    setText(e.target.value);
+  };
+
+  const handleSpeakClick = () => {
+    if (text.trim() !== "") {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.voice = selectedVoice;
+      utterance.rate = rate;
+      utterance.pitch = pitch;
+      
+      window.speechSynthesis.speak(utterance);
+    } else {
+      alert("Please enter some text.");
+    }
+  };
+
+  return (
+    <div>
+      <h2>Text-to-Speech with Voice Selection</h2>
+      <textarea
+        value={text}
+        onChange={handleTextChange}
+        rows="6"
+        cols="40"
+        placeholder="Enter text here"
+      />
+      <br />
+      <label>Choose Voice:</label>
+      <select
+        value={selectedVoice ? selectedVoice.name : ""}
+        onChange={(e) => {
+          const selected = voices.find(voice => voice.name === e.target.value);
+          setSelectedVoice(selected);
+        }}
+      >
+        {voices.map((voice, index) => (
+          <option key={index} value={voice.name}>
+            {voice.name} ({voice.lang})
+          </option>
+        ))}
+      </select>
+      <br />
+      <label>Speech Rate:</label>
+      <input
+        type="range"
+        min="0.1"
+        max="2"
+        step="0.1"
+        value={rate}
+        onChange={(e) => setRate(e.target.value)}
+      />
+      <br />
+      <label>Speech Pitch:</label>
+      <input
+        type="range"
+        min="0"
+        max="2"
+        step="0.1"
+        value={pitch}
+        onChange={(e) => setPitch(e.target.value)}
+      />
+      <br />
+      <button onClick={handleSpeakClick}>Speak</button>
+    </div>
+  );
+};
+
+export default TextToSpeechWithControls;
+```
+
 * Using Web Speech API:
 
 ```bash
@@ -45,6 +140,55 @@ const speakText = (text) => {
 };
 
 speakText("Hello, this is a text-to-speech example.");
+```
+
+* It is not a good idea to implement tts using gcloud from frotnend without needing an backend api because of:
+    * Security Concerns: Exposing API Keys: To directly call the Google Cloud API from the frontend, you would need to expose your Google Cloud API key. This could lead to security vulnerabilities because anyone with access to the frontend code can extract the key and abuse your quota or incur unnecessary charges.
+    Unauthorized Access: If you expose your credentials in the frontend, anyone can call your Google Cloud API with your key, potentially leading to misuse.
+
+    * Authentication and Authorization: Google Cloud services often require authentication (typically via service accounts and API keys). Directly integrating this into the frontend means you'd need to handle sensitive credentials securely, which is very hard in a frontend environment.
+
+    * CORS Issues: When trying to access Google Cloud APIs directly from a frontend, you'll likely encounter CORS (Cross-Origin Resource Sharing) issues, as Google Cloud APIs are not configured to accept requests directly from all origins for security reasons.
+
+    * Best Practice: It’s a best practice to implement a backend API for interacting with Google Cloud services. The backend can handle the API key securely, act as an intermediary between your frontend and Google Cloud, and return the results to the frontend without exposing sensitive data.
+
+
+* High quality tts: 
+    * Google Cloud Text-to-Speech: Similar to AWS Polly with neural voice options and multi-language support. However, it might be pricier for larger-scale use.
+    * Microsoft Azure Cognitive Services: Another powerful TTS API that offers lifelike voices, with competitive pricing and flexibility.
+    * IBM Watson Text-to-Speech: Another alternative with high-quality voices, although it might not be as widely used as AWS or Google services.
+    * ResponsiveVoice: A lightweight, client-side TTS solution if you're looking for simpler integration.
+
+
+* This is another way of using tts, here we can handle the speech rate, speech pitch and language without employing an translation api.
+
+```bash
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text-to-Speech with SpeechSynthesis</title>
+</head>
+<body>
+    <h2>Text-to-Speech Example</h2>
+    <textarea id="text-to-speak" placeholder="Enter text here" rows="5" cols="30"></textarea><br>
+    <button onclick="speakText()">Speak</button>
+
+    <script>
+        function speakText() {
+            const text = document.getElementById('text-to-speak').value;
+            const speech = new SpeechSynthesisUtterance(text);
+            speech.lang = "en-US";  // Set language to English
+            speech.rate = 1;        // Set speed (1 is normal, 0.5 is slow, 2 is fast)
+            speech.pitch = 1;       // Set pitch (1 is normal, 0 is low, 2 is high)
+
+            // Speak the text
+            window.speechSynthesis.speak(speech);
+        }
+    </script>
+</body>
+</html>
 ```
 
 * Backend (Python)
