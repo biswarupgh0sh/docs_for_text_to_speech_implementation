@@ -332,8 +332,7 @@ def text_to_speech_s3(request):
             return JsonResponse({"error": str(e)}, status=500)
 ```
 
-###### Here is the link of using tts(web speech api): <a href="https://biswarupgh0sh.github.io/text-to-speech-with-js/" target="_blank">Goto</a>
-
+###### Here is the link of using tts(web speech api): [Goto](https://biswarupgh0sh.github.io/text-to-speech-with-js/)
 
 
 #### 3. Challenges in TTS Integration
